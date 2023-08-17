@@ -1,0 +1,38 @@
+version: '3.9'
+services:
+  otto-demo:
+    container_name: otto-demo
+    build:
+      dockerfile: Dockerfile
+    image: otto-demo-img
+    volumes:
+      - ./:/user/src/otto 
+    depends_on:
+      - otto-test-db
+    ports:
+      - "127.0.0.1:8080:8080"
+  otto-test-db:
+    container_name: otto-test-db
+    image: mysql
+    restart: always
+    volumes:
+      - ${DB_FILE}:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_USER=${DB_USERNAME}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "127.0.0.1:3306:3306"
+  otto-test-admin:
+    profiles:
+      - full
+    container_name: otto-test-admin
+    image: phpmyadmin
+    restart: always
+    ports:
+      - "127.0.0.1:8000:80"
+    environment:
+      - PMA_HOST=otto-test-db
+      - PMA_PORT=3306
+      - PMA_ARBITRARY=1
